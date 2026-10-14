@@ -101,16 +101,6 @@ Done. The bot now runs on its own.
 
 ---
 
-## Customizing
-
-All at the top of `Code.gs`:
-
-| Setting | What it does |
-|---|---|
-| `FEED_URLS` | News sources, tried in order; the first one that works is used |
-| `HEADLINES_PER_POST` | How many headlines per message (default 2) |
-| `MESSAGE_TITLE` | The heading of each post |
-| `DISCLAIMER` | The footer added to each post. **Edit this to fit your group.** |
 
 Tzibbur messages are capped at about 1000 characters, which the script respects.
 
