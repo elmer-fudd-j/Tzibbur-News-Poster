@@ -1,3 +1,4 @@
+Beware this was made mainly with ai, and is incomplete right now (It works, but is not set up well). After working on this for a while, i went to eat lunch and just left it as is :).
 # Tzibbur News Poster Bot
 
 A small Google Apps Script that posts the latest Israel news headlines to a [Tzibbur](https://tzibbur.me) group every few hours, automatically. It pulls headlines from public RSS feeds, skips ones it already posted, keeps its login alive by itself, and emails you if something breaks.
