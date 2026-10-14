@@ -1,10 +1,9 @@
 /**
  * TZIBBUR PERIODIC NEWS POSTER BOT
- * Set-and-forget edition: rotating refresh cookie, locking, failure alerts.
- *
- * SECRETS: never put your refresh cookie in this file.
- * Store it in Project Settings -> Script Properties as TZIBBUR_REFRESH_COOKIE.
- * See README.md for full setup instructions.
+ * 
+ * SETUP INSTRUCTIONS:
+ * 1. Store your cookie in Project Settings -> Script Properties as TZIBBUR_REFRESH_COOKIE.
+ * 2. Update GROUP_ID in the configuration section below.
  */
 
 // ==========================================
@@ -25,7 +24,6 @@ const FEED_URLS = [
 
 const HEADLINES_PER_POST = 2;
 const MESSAGE_TITLE = '📰 *Israel News Wire Brief*';
-const DISCLAIMER = '\n---\n_⚠️ Note: This is not an official or public news chat. This is just a personal test bot I am running while playing around and learning about coding._';
 const MAX_MESSAGE_LENGTH = 1000;
 
 // Internal storage keys (leave as is)
@@ -230,73 +228,4 @@ function extractTitles(xml) {
     const titleMatch = match[1].match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i);
     if (!titleMatch) continue;
     const title = titleMatch[1]
-      .replace(/<\/?[^>]+(>|$)/g, '')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#0?39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (title) titles.push(title);
-  }
-  return titles;
-}
-
-function getHistory() {
-  try {
-    return JSON.parse(PropertiesService.getScriptProperties().getProperty(POSTED_HISTORY_KEY) || '[]');
-  } catch (e) {
-    return [];
-  }
-}
-
-function markPosted(titles) {
-  const history = titles.concat(getHistory()).slice(0, 30);
-  PropertiesService.getScriptProperties().setProperty(POSTED_HISTORY_KEY, JSON.stringify(history));
-}
-
-/**
- * Returns { text, titles } or null if there is nothing new to post.
- */
-function fetchLatestHeadlines() {
-  let titles = [];
-  for (let i = 0; i < FEED_URLS.length; i++) {
-    const xml = fetchFeedXml(FEED_URLS[i]);
-    if (!xml) continue;
-    titles = extractTitles(xml);
-    if (titles.length > 0) {
-      Logger.log('✅ Using feed: ' + FEED_URLS[i] + ' (' + titles.length + ' items)');
-      break;
-    }
-  }
-
-  if (titles.length === 0) {
-    Logger.log('❌ All feeds failed.');
-    return null;
-  }
-
-  const history = getHistory();
-  const fresh = titles.filter(function (t) { return history.indexOf(t) === -1; }).slice(0, HEADLINES_PER_POST);
-  if (fresh.length === 0) {
-    Logger.log('No new headlines since last post.');
-    return null;
-  }
-
-  const timeStamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'h:mm a');
-  let text = MESSAGE_TITLE + ' (' + timeStamp + ')\n';
-  fresh.forEach(function (t) {
-    const clean = t.length > 200 ? t.substring(0, 197) + '...' : t;
-    text += '\n• *' + clean + '*\n';
-  });
-
-  const maxLen = MAX_MESSAGE_LENGTH - DISCLAIMER.length;
-  if (text.length > maxLen) {
-    text = text.substring(0, maxLen) + '...\n';
-  }
-  text += DISCLAIMER;
-
-  Logger.log('Built message: ' + text.length + ' characters.');
-  return { text: text, titles: fresh };
-}
+      .replace
