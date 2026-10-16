@@ -1,9 +1,11 @@
 /**
  * TZIBBUR PERIODIC NEWS POSTER BOT
- * 
+ *
  * SETUP INSTRUCTIONS:
  * 1. Store your cookie in Project Settings -> Script Properties as TZIBBUR_REFRESH_COOKIE.
  * 2. Update GROUP_ID in the configuration section below.
+ * 3. Run testFeeds() once to see which feeds work from Google's servers.
+ * 4. Add a time-driven trigger for runNewsPosterBot (every 3 hours).
  */
 
 // ==========================================
@@ -13,7 +15,7 @@ const GROUP_ID = 'PASTE_YOUR_GROUP_ID_HERE';
 const API_BASE_URL = 'https://api.tzibbur.me/v1';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36';
 
-// Tried in order; the first feed that returns usable items wins.
+// All feeds are read every run; comment out any you don't want with //
 const FEED_URLS = [
   'https://news.google.com/rss/search?q=israel+when:6h&hl=en-US&gl=US&ceid=US:en',
   'https://www.timesofisrael.com/feed/',
@@ -36,8 +38,11 @@ const FEED_URLS = [
 ];
 
 const HEADLINES_PER_POST = 2;
-const MESSAGE_TITLE = '📰 *Israel News Wire Brief*';
+const ITEMS_PER_FEED = 5;       // newest items considered from each feed
+const HISTORY_SIZE = 100;       // how many posted headlines to remember
+const MESSAGE_TITLE = '📰 *News Brief*';
 const MAX_MESSAGE_LENGTH = 1000;
+
 
 // Internal storage keys (leave as is)
 const POSTED_HISTORY_KEY = 'TZIBBUR_POSTED_TITLES';
@@ -241,4 +246,90 @@ function extractTitles(xml) {
     const titleMatch = match[1].match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i);
     if (!titleMatch) continue;
     const title = titleMatch[1]
-      .replace
+      .replace(/<\/?[^>]+(>|$)/g, '')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#0?39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (title) titles.push(title);
+  }
+  return titles;
+}
+
+function getHistory() {
+  try {
+    return JSON.parse(PropertiesService.getScriptProperties().getProperty(POSTED_HISTORY_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function markPosted(titles) {
+  const history = titles.concat(getHistory()).slice(0, HISTORY_SIZE);
+  PropertiesService.getScriptProperties().setProperty(POSTED_HISTORY_KEY, JSON.stringify(history));
+}
+
+/**
+ * Reads every feed, interleaves them so no single source dominates,
+ * and returns { text, titles } or null if there is nothing new to post.
+ */
+function fetchLatestHeadlines() {
+  const perFeed = FEED_URLS.map(function (url) {
+    const xml = fetchFeedXml(url);
+    const items = xml ? extractTitles(xml).slice(0, ITEMS_PER_FEED) : [];
+    Logger.log((items.length ? '✅ ' : '❌ ') + url + ' (' + items.length + ' items)');
+    return items;
+  });
+
+  // Round-robin: newest from each feed, then second newest, etc.
+  const titles = [];
+  for (let i = 0; i < ITEMS_PER_FEED; i++) {
+    perFeed.forEach(function (items) {
+      if (items[i] && titles.indexOf(items[i]) === -1) titles.push(items[i]);
+    });
+  }
+
+  if (titles.length === 0) {
+    Logger.log('❌ All feeds failed.');
+    return null;
+  }
+
+  const history = getHistory();
+  const fresh = titles
+    .filter(function (t) { return history.indexOf(t) === -1; })
+    .slice(0, HEADLINES_PER_POST);
+  if (fresh.length === 0) {
+    Logger.log('No new headlines since last post.');
+    return null;
+  }
+
+  const timeStamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'h:mm a');
+  let text = MESSAGE_TITLE + ' (' + timeStamp + ')\n';
+  fresh.forEach(function (t) {
+    const clean = t.length > 200 ? t.substring(0, 197) + '...' : t;
+    text += '\n• *' + clean + '*\n';
+  });
+
+  const maxLen = MAX_MESSAGE_LENGTH ;
+  if (text.length > maxLen) {
+    text = text.substring(0, maxLen) + '...\n';
+  }
+  
+
+  Logger.log('Built message: ' + text.length + ' characters.');
+  return { text: text, titles: fresh };
+}
+
+// ==========================================
+// 7. TOOLS (run manually, never posts anything)
+// ==========================================
+function testFeeds() {
+  FEED_URLS.forEach(function (url) {
+    const xml = fetchFeedXml(url);
+    Logger.log((xml ? '✅ ' + extractTitles(xml).length + ' items: ' : '❌ ') + url);
+  });
+}
