@@ -1,4 +1,3 @@
-Beware this was made mainly with ai, and is incomplete right now (It works, but is not set up well). After working on this for a while, i went to eat lunch and just left it as is :).
 # Tzibbur News Poster Bot
 
 A small Google Apps Script that posts the latest Israel news headlines to a [Tzibbur](https://tzibbur.me) group every few hours, automatically. It pulls headlines from public RSS feeds, skips ones it already posted, keeps its login alive by itself, and emails you if something breaks.
@@ -10,7 +9,7 @@ A small Google Apps Script that posts the latest Israel news headlines to a [Tzi
 ## What you need
 
 - A Google account (free)
-- A Tzibbur account that can post in the target group
+- A Tzibbur account that can post in the target group (Please Note: If you log into the web with your account it will break the bot, so I recommend using a dedicated account.)
 - A computer with Chrome (or Edge/Firefox) to grab one login cookie
 - About 15 minutes
 
@@ -44,7 +43,7 @@ const GROUP_ID = 'your-group-id-here';
 
 The bot needs a long-lived login "key" called the **refresh cookie**. It then renews its own short-term access by itself. You only do this step once (and again if the bot ever emails you that it's broken).
 
-**Important:** Use a **separate** login just for the bot. If you also use the same login in your normal browser, the two will invalidate each other.
+**Important:** Use a **separate** login just for the bot. If you also use the same login in your normal browser, the two will invalidate each other. So don't log in to the web after you set up the bot, or it will kill the script. 
 
 1. Open a **private/incognito window**: **Ctrl + Shift + N** in Chrome or Edge (**Cmd + Shift + N** on Mac), or **Ctrl + Shift + P** in Firefox. You don't need to be signed in to Chrome.
 2. Go to [tzibbur.me](https://tzibbur.me) but **don't log in yet**.
@@ -56,7 +55,7 @@ The bot needs a long-lived login "key" called the **refresh cookie**. It then re
    Example line: `tzibbur_refresh=AbC123...; Path=/v1/sessions; Expires=...`
    You want just `AbC123...`
    (You can also try the request's **Cookies** sub-tab, which lists the same value.)
-8. Keep the value somewhere for the next step. **Do NOT reload the page, click around, or log out** in that window. Close it when you're done.
+8. Keep the value somewhere for the next step. **Do NOT reload the page, click around, or log out** in that window. Close it when you're done, WITHOUT logging out- or your cookie will die.
 
 If you can't find `tzibbur_refresh` on `verify`, check the requests right after it (for example `sessions` or `sessions/refresh`) and look at their response cookies.
 
@@ -131,7 +130,7 @@ Tzibbur messages are capped at about 1000 characters, which the script respects.
 
 ---
 
-## Security: read this before putting anything on GitHub
+## Security: 
 
 - **Never commit your refresh cookie, access tokens, or phone number.** Anyone with the refresh cookie can act as you on Tzibbur.
 - Keep the cookie only in **Script Properties**, never in `Code.gs`.
@@ -139,6 +138,12 @@ Tzibbur messages are capped at about 1000 characters, which the script respects.
 - If you ever leak a cookie, log out of that session on Tzibbur, which invalidates it.
 
 ---
+
+## News Sources:
+- You can choose which news source to try first
+- In 1. Configuration, under "NEWS SOURCES", there is a list of URLs in the order in which they will be tried.
+- To turn one off one simply add a // in the beginning of that line.
+- You can reorder them, or add your own. Just make sure it has quotes '...' and a comma ..., after it.
 
 ## License
 
