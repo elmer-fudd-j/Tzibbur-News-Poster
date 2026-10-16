@@ -19,7 +19,20 @@ const FEED_URLS = [
   'https://www.timesofisrael.com/feed/',
   'https://www.jns.org/feed/',
   'https://www.ynetnews.com/Integration/StoryRss3082.xml',
-  'https://www.jpost.com/rss/rssfeedsheadlines.aspx'
+  'https://www.jpost.com/rss/rssfeedsheadlines.aspx',
+  'https://matzav.com/feed/',
+  'https://www.theyeshivaworld.com/feed',
+  'https://thelakewoodscoop.com/news/feed',
+  'https://hefkervelt.blogspot.com/feeds/posts/default',
+  'https://vinnews.com/feed/',
+  'https://hamodia.com/feed/',
+  'https://yatedne.com/feed/',
+  'https://www.jewishpress.com/feed/',
+  'https://collive.com/feed/',
+  'https://www.jta.org/feed',
+  'https://www.algemeiner.com/feed/',
+  'https://jewishinsider.com/feed/',
+  'https://www.israelnationalnews.com/Rss.aspx',
 ];
 
 const HEADLINES_PER_POST = 2;
