@@ -15,6 +15,7 @@ const GROUP_ID = 'PASTE_YOUR_GROUP_ID_HERE';
 const API_BASE_URL = 'https://api.tzibbur.me/v1';
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36';
 
+//==NEWS SOURCES==
 // All feeds are read every run; comment out any you don't want with //
 const FEED_URLS = [
   'https://news.google.com/rss/search?q=israel+when:6h&hl=en-US&gl=US&ceid=US:en',
